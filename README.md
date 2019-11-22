@@ -2,6 +2,11 @@
 
 "As a developer i want to login to Microsoft SQL Server from a java container using integrated security (kerberos)"
 
+- OpenShift/Kubernetes containers
+- Sidecar patter - kerberos ticket refresher
+- Test kerberos server (linux) for demo
+- Work against ActiveDirectory (where SQL Server also integrated into AD)
+
 ### Docker Locally
 
 Kerberos Server
