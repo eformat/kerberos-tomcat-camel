@@ -1,6 +1,6 @@
 ## kerberos-tomcat-camel
 
-"As a developer i want to login to Microsoft SQL Server from a java container using integrated security (kerberos)"
+"As a developer i want to login to Microsoft SQL Server from a java/tomcat container using integrated security (kerberos)"
 
 - OpenShift/Kubernetes containers
 - Sidecar patter - kerberos ticket refresher
