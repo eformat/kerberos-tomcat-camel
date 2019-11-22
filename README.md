@@ -1,5 +1,6 @@
 ## kerberos-tomcat-camel
 
+### Locally
 
 Clone this repo and build
 ```
@@ -7,11 +8,19 @@ cd ~/git/ibmmq-tomcat-camel
 ./buildrun.sh
 ```
 
-Test
+### OpenShift
 
+Deploy example
 ```
-http://localhost:8080/camel/hello?name=mike
+make demo
 ```
+
+Test
+```
+http $(oc get route test-example-app --template='{{ .spec.host }}')/camel/hello?name=kerberos
+```
+
+Tomcat Logs
 
 ```
 2019-11-22 04:56:42,213 [main] INFO  org.apache.catalina.startup.Catalina- Server startup in 3473 ms
