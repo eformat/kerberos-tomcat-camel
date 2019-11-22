@@ -1,0 +1,196 @@
+apiVersion: v1
+kind: Template
+metadata:
+  creationTimestamp: null
+  name: client
+parameters:
+- name: PREFIX
+  displayName: Prefix
+  description: Prefix to uniquely identify the client app and its resources
+  required: true
+- name: IMAGE_KINIT
+  displayName: KInit Sidecar Image
+  description: Image reference for the KInit Sidecar container. 
+  value: quay.io/eformat/kinit-sidecar:latest
+  required: true
+- name: IMAGE_APP
+  displayName: Example App Image
+  description: Image reference for the Example container.
+  value: quay.io/eformat/kerberos-tomcat-camel:latest
+  required: true
+- name: KDC_SERVER
+  displayName: KDC Server
+  description: Hostname (service name) of the KDC Server
+  required: true
+- name: KRB5_REALM
+  displayName: Kerberos Realm
+  required: true
+  value: EXAMPLE.COM
+objects:
+- apiVersion: v1
+  kind: ImageStream
+  metadata:
+    name: ${PREFIX}-kinit-sidecar
+  spec:
+    lookupPolicy:
+      local: false
+    tags:
+    - annotations: null
+      from:
+        kind: DockerImage
+        name: ${IMAGE_KINIT}
+      importPolicy: 
+        scheduled: true
+      name: latest
+      referencePolicy:
+        type: ""
+- apiVersion: v1
+  kind: ImageStream
+  metadata:
+    name: ${PREFIX}-example-app
+  spec:
+    lookupPolicy:
+      local: false
+    tags:
+      - annotations: null
+        from:
+          kind: DockerImage
+          name: ${IMAGE_APP}
+        importPolicy:
+          scheduled: true
+        name: latest
+        referencePolicy:
+          type: ""
+- apiVersion: v1
+  kind: DeploymentConfig
+  metadata:
+    name: ${PREFIX}-example-app
+  spec:
+    replicas: 1
+    revisionHistoryLimit: 10
+    selector:
+      deploymentconfig: ${PREFIX}-example-app
+    strategy:
+      activeDeadlineSeconds: 21600
+      resources: {}
+      rollingParams:
+        intervalSeconds: 1
+        maxSurge: 25%
+        maxUnavailable: 25%
+        timeoutSeconds: 600
+        updatePeriodSeconds: 1
+      type: Rolling
+    template:
+      metadata:
+        labels:
+          deploymentconfig: ${PREFIX}-example-app
+      spec:
+        containers:
+        - env:
+            - name: PERIOD_SECONDS
+              value: "10"
+            - name: OPTIONS
+              value: -k MSSQLSvc/msql.example.com:1433@${KRB5_REALM}
+          image: ''
+          imagePullPolicy: Always
+          name: kinit-sidecar
+          resources: {}
+          terminationMessagePath: /dev/termination-log
+          terminationMessagePolicy: File
+          volumeMounts:
+          - mountPath: /krb5
+            name: keytabs
+          - mountPath: /dev/shm
+            name: ccache
+          - mountPath: /etc/krb5.conf.d
+            name: config
+        - image: ''
+          env:
+            - name: KRB5CCNAME
+              value: FILE:/dev/shm/ccache
+          imagePullPolicy: Always
+          name: example-app
+          resources: {}
+          terminationMessagePath: /dev/termination-log
+          terminationMessagePolicy: File
+          volumeMounts:
+          - mountPath: /dev/shm
+            name: ccache
+          - mountPath: /etc/krb5.conf.d
+            name: config
+        dnsPolicy: ClusterFirst
+        restartPolicy: Always
+        schedulerName: default-scheduler
+        securityContext: {}
+        terminationGracePeriodSeconds: 30
+        volumes:
+        - emptyDir: {}
+          name: keytabs
+        - emptyDir:
+            medium: Memory
+          name: ccache
+        - configMap:
+            defaultMode: 420
+            name: ${PREFIX}-krb5-client
+          name: config
+    test: false
+    triggers:
+    - type: ConfigChange
+    - imageChangeParams:
+        automatic: true
+        containerNames:
+        - kinit-sidecar
+        from:
+          kind: ImageStreamTag
+          name: ${PREFIX}-kinit-sidecar:latest
+      type: ImageChange
+    - imageChangeParams:
+        automatic: true
+        containerNames:
+          - example-app
+        from:
+          kind: ImageStreamTag
+          name: ${PREFIX}-example-app:latest
+      type: ImageChange
+- apiVersion: v1
+  data:
+    ${KRB5_REALM}.conf: |+
+      [realms]
+      ${KRB5_REALM} = {
+         kdc = ${KDC_SERVER}:88
+         admin_server = ${KDC_SERVER}:749
+         kpasswd_server = ${KDC_SERVER}:464
+      }
+
+  kind: ConfigMap
+  metadata:
+    name: ${PREFIX}-krb5-client
+- apiVersion: v1
+  kind: Service
+  metadata:
+    creationTimestamp: null
+    name: ${PREFIX}-example-app
+  spec:
+    ports:
+      - name: web
+        port: 8080
+        protocol: TCP
+        targetPort: 8080
+    selector:
+      deploymentconfig: ${PREFIX}-example-app
+    sessionAffinity: None
+    type: ClusterIP
+- apiVersion: route.openshift.io/v1
+  kind: Route
+  metadata:
+    creationTimestamp: null
+    name: ${PREFIX}-example-app
+  spec:
+    port:
+      targetPort: web
+    subdomain: ""
+    to:
+      kind: Service
+      name: ${PREFIX}-example-app
+      weight: 100
+    wildcardPolicy: None
