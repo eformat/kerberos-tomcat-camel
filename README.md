@@ -7,6 +7,9 @@
 - Test kerberos server (linux) for demo
 - Work against ActiveDirectory (where SQL Server also integrated into AD)
 
+The last step (the actual MSSQL connection) is WIP! (will be a camel URI)
+- https://gist.github.com/eformat/f920f05cdb481cf94996ad09c6e6e500
+
 ### Docker Locally
 
 Kerberos Server
@@ -142,3 +145,9 @@ Created InitSecContextToken:
 Service ticket generated, JAVA works!
 
 ```
+
+### Links
+- https://blog.openshift.com/kerberos-sidecar-container/
+- https://docs.microsoft.com/en-us/sql/connect/odbc/linux-mac/using-integrated-authentication?view=sql-server-ver15
+- https://github.com/microsoft/mssql-docker/issues/165
+- https://gist.github.com/eformat/f920f05cdb481cf94996ad09c6e6e500
