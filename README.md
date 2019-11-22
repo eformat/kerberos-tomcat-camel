@@ -1,6 +1,27 @@
 ## kerberos-tomcat-camel
 
-### Locally
+### Docker Locally
+
+Kerberos Server
+```
+docker run --privileged --rm -v /dev/shm:/dev/shm -e RUN_MODE=kadmin --name=kdc-server-kadmin --net host quay.io/eformat/kdc-server:latest
+docker run --privileged --rm -v /dev/shm:/dev/shm -e RUN_MODE=kdc --name=kdc-server-kdc --net host quay.io/eformat/kdc-server:latest
+```
+
+Add `example.com` domain and host entries to `/etc/hosts`
+```
+127.0.0.1   localhost localhost.localdomain localhost4 localhost4.localdomain4 EXAMPLE.COM kerberos.example.com
+```
+
+Adjust `krb5.conf` so we resolve locally
+```
+[realms]
+EXAMPLE.COM = {
+    kdc = kerberos.example.com:8888
+    admin_server = kerberos.example.com:8749
+    kpasswd_server = kerberos.example.com:8464
+}
+```
 
 Clone this repo and build
 ```
@@ -9,6 +30,8 @@ cd ~/git/ibmmq-tomcat-camel
 ```
 
 ### OpenShift
+
+Login to OpenShift
 
 Deploy example
 ```
@@ -21,7 +44,6 @@ http $(oc get route test-example-app --template='{{ .spec.host }}')/camel/hello?
 ```
 
 Tomcat Logs
-
 ```
 2019-11-22 04:56:42,213 [main] INFO  org.apache.catalina.startup.Catalina- Server startup in 3473 ms
 Hello from KerberosProcessor
