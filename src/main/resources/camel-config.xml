@@ -6,7 +6,8 @@
          http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
          http://camel.apache.org/schema/spring http://camel.apache.org/schema/spring/camel-spring.xsd">
 
-    <bean id="kerberosProcessor" class="com.example.KerberosProcessor" />
+    <bean id="kerberosProcessor" class="com.example.KerberosProcessor"/>
+    <bean id="jdbcProcessor" class="com.example.JDBCKerberosProcessor"/>
 
     <camelContext xmlns="http://camel.apache.org/schema/spring">
 
@@ -24,10 +25,20 @@
                     <setExchangePattern pattern="InOnly"/>
                     <process ref="kerberosProcessor"/>
                 </when>
+                <when>
+                    <!-- is there a header with the key sqlconnect? -->
+                    <header>sqlconnect</header>
+                    <!-- yes so return back a message to the user -->
+                    <transform>
+                        <simple>Hi I am ${sysenv.HOSTNAME}. Trying to SQLConnect</simple>
+                    </transform>
+                    <setExchangePattern pattern="InOnly"/>
+                    <process ref="jdbcProcessor"/>
+                </when>
                 <otherwise>
                     <!-- if no name parameter then output a syntax to the user -->
                     <transform>
-                        <constant>Add a name parameter to uri, eg ?name=foo</constant>
+                        <constant>Kerberos Check: ?name=kerberos, SQLConnect: ?sqlconnect=true</constant>
                     </transform>
                 </otherwise>
             </choice>

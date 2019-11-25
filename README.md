@@ -7,8 +7,19 @@
 - Test kerberos server (linux) for demo
 - Work against ActiveDirectory (where SQL Server also integrated into AD)
 
-The last step (the actual MSSQL connection) is WIP! (will be a camel URI)
-- https://gist.github.com/eformat/f920f05cdb481cf94996ad09c6e6e500
+### Kerberos background
+
+-  Tickets are used to authenticate, avoiding the storing, or sending, of passwords, and it is based on symmetric key cryptography
+- A Kerberos user, or service account, is referred to as a principal, which is authenticated against a particular realm. For example, {account}@{realm}
+- To support automated logins Kerberos clients use keytab files, combinations of principals and encrypted keys, that allow systems to authenticate without human interaction.
+- Establishing an authenticated session requires an authentication request to a Key Distribution Center (KDC), typically performed with the kinit command line tool. If successful, the authentication request will result in an authentication token, with an expiry date and time, and that needs to be refreshed at regular intervals.
+
+For containers:
+
+- A valid keytab file must be provided at startup 
+- Sidecar – Refresh the token in a sidecar container, and share with the application container
+
+![kinit-refresh.png](images/kinit-refresh.png)
 
 ### Docker Locally
 
@@ -39,9 +50,9 @@ cd ~/git/ibmmq-tomcat-camel
 ./buildrun.sh
 ```
 
-### OpenShift
+### OpenShift deployment
 
-Login to OpenShift
+Login to OpenShift `oc login`
 
 Deploy example
 ```
@@ -143,7 +154,6 @@ Created InitSecContextToken:
 0280: EC 9E 79 59 F6 87 98 4E                            ..yY...N
 
 Service ticket generated, JAVA works!
-
 ```
 
 ### Links

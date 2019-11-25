@@ -12,6 +12,7 @@
         <pooled.jms.version>1.1.0</pooled.jms.version>
         <camel.version>2.24.2</camel.version>
         <spring.version>5.2.1.RELEASE</spring.version>
+        <msql.version>7.4.1.jre8</msql.version>
     </properties>
 
     <dependencies>
@@ -45,6 +46,12 @@
             <groupId>org.apache.camel</groupId>
             <artifactId>camel-jms</artifactId>
             <version>${camel.version}</version>
+        </dependency>
+        <!-- sql server jdbc -->
+        <dependency>
+            <groupId>com.microsoft.sqlserver</groupId>
+            <artifactId>mssql-jdbc</artifactId>
+            <version>${msql.version}</version>
         </dependency>
         <!-- we need spring web -->
         <dependency>
