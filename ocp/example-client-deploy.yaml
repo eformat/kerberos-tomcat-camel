@@ -116,7 +116,8 @@ objects:
           volumeMounts:
           - mountPath: /dev/shm
             name: ccache
-          - mountPath: /etc/krb5.conf.d
+          - mountPath: /opt/webserver/conf/krb5.conf
+            subPath: krb5.conf
             name: config
         dnsPolicy: ClusterFirst
         restartPolicy: Always
@@ -154,7 +155,23 @@ objects:
       type: ImageChange
 - apiVersion: v1
   data:
-    ${KRB5_REALM}.conf: |+
+    krb5.conf: |+
+      [libdefaults]
+      noaddresses = true
+      default_realm = ${KRB5_REALM}
+      default_tgs_enctypes = aes256-cts aes128-cts arcfour-hmac-md5 des-cbc-md5 des-cbc-crc
+      default_tkt_enctypes = aes256-cts aes128-cts arcfour-hmac-md5 des-cbc-md5 des-cbc-crc
+      permitted_enctypes = aes256-cts aes128-cts arcfour-hmac-md5 des-cbc-md5 des-cbc-crc
+      dns_lookup_realm = false
+      passwd_check_s_address = false
+      udp_preference_limit = 1
+      rdns = false
+      kdc_timesync = 0
+      ignore_acceptor_hostname = true
+
+      [domain_realm]
+      .${KRB5_REALM} = ${KRB5_REALM}
+
       [realms]
       ${KRB5_REALM} = {
          kdc = ${KDC_SERVER}:88
