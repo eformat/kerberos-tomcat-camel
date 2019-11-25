@@ -15,4 +15,14 @@
     <!--
     <Valve className="org.apache.catalina.valves.CometConnectionManagerValve" />
     -->
+    <Resource name="jdbc/MySQLServer"
+              auth="Container"
+              type="javax.sql.DataSource"
+              username="sa"
+              password="password"
+              driverClassName="com.microsoft.sqlserver.jdbc.SQLServerDriver"
+              url="jdbc:sqlserver://localhost:1433;databaseName=model"/>
+
+    <!--/* Kerberos */ "jdbc:sqlserver://localhost;databaseName=model;integratedSecurity=true;authenticationScheme=JavaKerberos" -->
+
 </Context>
