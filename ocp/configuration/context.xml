@@ -19,9 +19,9 @@
               auth="Container"
               type="javax.sql.DataSource"
               username="sa"
-              password="password"
+              password="P@ssw0rd_"
               driverClassName="com.microsoft.sqlserver.jdbc.SQLServerDriver"
-              url="jdbc:sqlserver://localhost:1433;databaseName=model"/>
+              url="jdbc:sqlserver://mssql-service-internal:1433;databaseName=model"/>
 
     <!--/* Kerberos */ "jdbc:sqlserver://localhost;databaseName=model;integratedSecurity=true;authenticationScheme=JavaKerberos" -->
 

@@ -47,9 +47,15 @@ oc new-project $project_name
 oc new-app -f krb5-server-deploy.yaml -p NAME=test
 oc new-app -f example-client-deploy.yaml -p PREFIX=test -p KDC_SERVER=test
 
+# sqlserver
+oc create secret generic mssql --from-literal=SA_PASSWORD="P@ssw0rd_"
+oc apply -f sql-storage.yaml
+oc apply -f sqldeployment.yaml
+
 # wait for Pods to start and be running
 watch_deploy test $project_name
 watch_deploy test-example-app $project_name
+watch_deploy mssql-deployment $project_name
 
 server_pod=$(oc get pod -l app=krb5-server -o name)
 admin_pwd=$(oc logs -c kdc $server_pod | head -n 1 | sed 's/.*Your\ KDC\ password\ is\ //')
@@ -69,5 +75,5 @@ echo $admin_pwd | oc rsh -c kinit-sidecar $app_pod kadmin -r $realm -p admin/adm
 # add to keytab
 echo $admin_pwd | oc rsh -c kinit-sidecar $app_pod kadmin -r $realm -p admin/admin@$realm -q "ktadd MSSQLSvc/msql.example.com:1433@EXAMPLE.COM"
 
-# watch app logs
-oc logs -f $app_pod -c example-app
+# watch logs
+stern ${app_pod##pod/}
